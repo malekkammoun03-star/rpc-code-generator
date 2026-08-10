@@ -1,0 +1,5 @@
+message Employee
+{
+    int32 id = 1;
+    string company = 2;
+}
