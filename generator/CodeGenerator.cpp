@@ -172,7 +172,7 @@ void CodeGenerator::generate(const Message &message)
 }
 void CodeGenerator::generateService(const Service &service)
 {
-    std::string fileName = "output/" + service.name + ".h";
+    std::string fileName = "../output/" + service.name + ".h";
 
     std::ofstream file(fileName);
 
@@ -184,7 +184,6 @@ void CodeGenerator::generateService(const Service &service)
 
     file << "#pragma once\n\n";
 
-    // Include request and response message headers
     for (const auto &method : service.methods)
     {
         file << "#include \"" << method.requestType << ".h\"\n";
@@ -193,7 +192,6 @@ void CodeGenerator::generateService(const Service &service)
 
     file << "\n";
 
-    // Generate RPC method declarations
     for (const auto &method : service.methods)
     {
         file << method.responseType

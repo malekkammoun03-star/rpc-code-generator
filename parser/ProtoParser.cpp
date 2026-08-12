@@ -29,17 +29,12 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
     {
         if (line.empty())
             continue;
-
-        // Ignore syntax declaration
         if (line.find("syntax") != std::string::npos)
             continue;
 
-        // -----------------------------
-        // SERVICE
-        // -----------------------------
         if (line.find("service") != std::string::npos)
         {
-            // Save previous service if necessary
+
             if (!currentService.name.empty())
             {
                 services.push_back(currentService);
@@ -57,10 +52,6 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
 
             continue;
         }
-
-        // -----------------------------
-        // RPC METHOD
-        // -----------------------------
         if (insideService && line.find("rpc") != std::string::npos)
         {
             RpcMethod method;
@@ -72,12 +63,11 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
             std::string returnsKeyword;
             std::string responseToken;
 
-            ss >> keyword;          // rpc
-            ss >> methodAndRequest; // GetUser(UserRequest)
-            ss >> returnsKeyword;   // returns
-            ss >> responseToken;    // (UserResponse);
+            ss >> keyword;
+            ss >> methodAndRequest;
+            ss >> returnsKeyword;
+            ss >> responseToken;
 
-            // Find '('
             size_t openParen = methodAndRequest.find('(');
             size_t closeParen = methodAndRequest.find(')');
 
@@ -91,14 +81,12 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
                     closeParen - openParen - 1);
             }
 
-            // Remove '(' from response
             if (!responseToken.empty() &&
                 responseToken.front() == '(')
             {
                 responseToken.erase(0, 1);
             }
 
-            // Remove ')' and ';'
             while (!responseToken.empty() &&
                    (responseToken.back() == ')' ||
                     responseToken.back() == ';'))
@@ -112,9 +100,7 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
 
             continue;
         }
-        // -----------------------------
-        // END OF SERVICE
-        // -----------------------------
+
         if (insideService && line.find("}") != std::string::npos)
         {
             if (!currentService.name.empty())
@@ -128,13 +114,9 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
             continue;
         }
 
-        // Ignore opening brace
         if (line.find("{") != std::string::npos)
             continue;
 
-        // -----------------------------
-        // MESSAGE
-        // -----------------------------
         if (line.find("message") != std::string::npos)
         {
             if (!currentMessage.name.empty())
@@ -153,9 +135,6 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
             continue;
         }
 
-        // -----------------------------
-        // MESSAGE FIELD
-        // -----------------------------
         Field field;
 
         std::stringstream ss(line);
@@ -168,7 +147,6 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
         ss >> equalSign;
         ss >> numberToken;
 
-        // Make sure this is actually a field
         if (field.type.empty() ||
             field.name.empty() ||
             numberToken.empty())
@@ -176,11 +154,9 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
             continue;
         }
 
-        // Remove ';'
         if (!numberToken.empty() && numberToken.back() == ';')
             numberToken.pop_back();
 
-        // Make sure the field number is valid
         try
         {
             field.number = std::stoi(numberToken);
@@ -193,19 +169,16 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
         currentMessage.fields.push_back(field);
     }
 
-    // Save last message
     if (!currentMessage.name.empty())
     {
         messages.push_back(currentMessage);
     }
 
-    // Save last service
     if (!currentService.name.empty())
     {
         services.push_back(currentService);
     }
 
-    // Debug: display messages
     for (const auto &msg : messages)
     {
         std::cout << "\nMessage: " << msg.name << std::endl;
@@ -219,7 +192,6 @@ std::vector<Message> ProtoParser::parse(const std::string &filename)
         }
     }
 
-    // Debug: display services
     for (const auto &service : services)
     {
         std::cout << "\nService: " << service.name << std::endl;

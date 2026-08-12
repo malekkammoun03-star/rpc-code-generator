@@ -1,3 +1,6 @@
 #pragma once
 
- GetUser(UserRequest)(returns request);
+#include "UserRequest.h"
+#include "UserResponse.h"
+
+UserResponse GetUser(UserRequest request);
