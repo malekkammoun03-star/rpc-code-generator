@@ -1,16 +1,21 @@
 #include <string.h>
 #include "UserRequest.h"
 
-void serializeUserRequest(const UserRequest* object, uint8_t* buffer)
+size_t serializeUserRequest(const UserRequest* object, uint8_t* buffer)
 {
-    memcpy(buffer, &object->id, sizeof(int32_t));
-    buffer += sizeof(int32_t);
+    size_t offset = 0;
 
+    memcpy(buffer + offset, &object->id, sizeof(int32_t));
+    offset += sizeof(int32_t);
+
+    return offset;
 }
 
 void deserializeUserRequest(UserRequest* object, const uint8_t* buffer)
 {
-    memcpy(&object->id, buffer, sizeof(int32_t));
-    buffer += sizeof(int32_t);
+    size_t offset = 0;
+
+    memcpy(&object->id, buffer + offset, sizeof(int32_t));
+    offset += sizeof(int32_t);
 
 }

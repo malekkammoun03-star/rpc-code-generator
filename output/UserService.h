@@ -1,6 +1,20 @@
 #pragma once
 
+#include "RpcClient.h"
 #include "UserRequest.h"
 #include "UserResponse.h"
 
-UserResponse GetUser(UserRequest request);
+class UserServiceClient
+{
+public:
+    UserServiceClient(
+        const std::string& host,
+        int port);
+
+    ~UserServiceClient();
+
+    UserResponse GetUser(UserRequest request);
+
+private:
+    RpcClient client;
+};

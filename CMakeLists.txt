@@ -10,6 +10,7 @@ add_executable(app
     parser/ProtoParser.cpp
     generator/CodeGenerator.cpp
     runtime/TlsClient.cpp
+    runtime/RpcClient.cpp
 )
 
 target_include_directories(app PRIVATE
