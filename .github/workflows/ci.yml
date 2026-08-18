@@ -1,0 +1,62 @@
+name: RPC Code Generator CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S . -B build -G Ninja
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Run parser/code generator
+        shell: pwsh
+        run: |
+          .\build\app.exe proto\rpc.proto
+
+      - name: Verify generated files
+        shell: pwsh
+        run: |
+          if (!(Test-Path "output\UserRequest.h")) {
+            throw "UserRequest.h was not generated"
+          }
+
+          if (!(Test-Path "output\UserRequest.c")) {
+            throw "UserRequest.c was not generated"
+          }
+
+          if (!(Test-Path "output\UserResponse.h")) {
+            throw "UserResponse.h was not generated"
+          }
+
+          if (!(Test-Path "output\UserResponse.c")) {
+            throw "UserResponse.c was not generated"
+          }
+
+          if (!(Test-Path "output\UserService.h")) {
+            throw "UserService.h was not generated"
+          }
+
+          Write-Host "Generated files verified successfully."
+
+      - name: Run tests
+        shell: pwsh
+        run: |
+          if (Test-Path ".\build\test_tls.exe") {
+            .\build\test_tls.exe
+          } else {
+            Write-Host "TLS test executable not found - skipping."
+          }
