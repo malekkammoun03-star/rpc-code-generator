@@ -16,47 +16,48 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install MSYS2 and mbedTLS
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-mbedtls
+
       - name: Configure CMake
-        run: cmake -S . -B build -G Ninja
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B build -G Ninja
 
       - name: Build project
-        run: cmake --build build
-
-      - name: Run parser/code generator
-        shell: pwsh
+        shell: msys2 {0}
         run: |
-          .\build\app.exe proto\rpc.proto
+          cmake --build build
+
+      - name: Run code generator
+        shell: msys2 {0}
+        run: |
+          ./build/app.exe proto/rpc.proto
 
       - name: Verify generated files
-        shell: pwsh
+        shell: msys2 {0}
         run: |
-          if (!(Test-Path "output\UserRequest.h")) {
-            throw "UserRequest.h was not generated"
-          }
+          test -f output/UserRequest.h
+          test -f output/UserRequest.c
+          test -f output/UserResponse.h
+          test -f output/UserResponse.c
+          test -f output/UserService.h
+          test -f output/UserService.cpp
 
-          if (!(Test-Path "output\UserRequest.c")) {
-            throw "UserRequest.c was not generated"
-          }
-
-          if (!(Test-Path "output\UserResponse.h")) {
-            throw "UserResponse.h was not generated"
-          }
-
-          if (!(Test-Path "output\UserResponse.c")) {
-            throw "UserResponse.c was not generated"
-          }
-
-          if (!(Test-Path "output\UserService.h")) {
-            throw "UserService.h was not generated"
-          }
-
-          Write-Host "Generated files verified successfully."
-
-      - name: Run tests
-        shell: pwsh
+      - name: Run TLS test
+        shell: msys2 {0}
         run: |
-          if (Test-Path ".\build\test_tls.exe") {
-            .\build\test_tls.exe
-          } else {
-            Write-Host "TLS test executable not found - skipping."
-          }
+          if [ -f build/test_tls.exe ]; then
+            ./build/test_tls.exe
+          else
+            echo "TLS test executable not found"
+            exit 1
+          fi
