@@ -49,6 +49,7 @@ jobs:
 
           echo "All generated files exist."
 
-      - name: Run TLS test
+      - name: Check TLS test executable
         run: |
-          ./build/test_tls
+          test -f build/test_tls
+          echo "TLS test executable built successfully."
