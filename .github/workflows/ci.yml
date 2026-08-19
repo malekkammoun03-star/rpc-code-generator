@@ -11,32 +11,56 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Show environment
         run: |
-          sudo apt-get update
+          echo "Starting CI..."
+          uname -a
+          cmake --version
+          g++ --version
+
+      - name: Install dependencies
+        timeout-minutes: 3
+        run: |
+          sudo apt-get update -y
           sudo apt-get install -y \
             build-essential \
             cmake \
             ninja-build \
             libmbedtls-dev
 
+      - name: Check mbedTLS
+        run: |
+          echo "Checking mbedTLS installation..."
+          ls -l /usr/include/mbedtls/ssl.h
+          ldconfig -p | grep mbedtls || true
+
       - name: Configure project
+        timeout-minutes: 2
         run: |
           rm -rf build
           cmake -S . -B build -G Ninja
 
       - name: Build project
+        timeout-minutes: 3
         run: |
-          cmake --build build
+          cmake --build build --verbose
+
+      - name: Check generated executables
+        run: |
+          test -f build/app
+          test -f build/test_tls
+          echo "Executables built successfully."
 
       - name: Run code generator
+        timeout-minutes: 1
         run: |
-          ./build/app proto/rpc.proto
+          timeout 30s ./build/app proto/rpc.proto
 
       - name: Verify generated files
         run: |
@@ -46,10 +70,10 @@ jobs:
           test -f output/UserResponse.c
           test -f output/UserService.h
           test -f output/UserService.cpp
-
           echo "All generated files exist."
 
-      - name: Check TLS test executable
+      - name: CI summary
         run: |
-          test -f build/test_tls
-          echo "TLS test executable built successfully."
+          echo "================================"
+          echo "RPC Code Generator CI PASSED"
+          echo "================================"
