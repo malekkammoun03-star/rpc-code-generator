@@ -10,58 +10,35 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup MSYS2 UCRT64
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            mingw-w64-ucrt-x86_64-toolchain
-            mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-ninja
-            mingw-w64-ucrt-x86_64-mbedtls
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            libmbedtls-dev
 
       - name: Configure project
-        shell: msys2 {0}
         run: |
-          export PATH="/ucrt64/bin:$PATH"
-          export CC=/ucrt64/bin/gcc.exe
-          export CXX=/ucrt64/bin/g++.exe
-
-          echo "Compiler:"
-          which g++
-          g++ --version
-
-          echo "mbedTLS:"
-          ls /ucrt64/include/mbedtls/net_sockets.h
-          ls /ucrt64/lib/libmbedtls*
-
           rm -rf build
-
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_C_COMPILER=/ucrt64/bin/gcc.exe \
-            -DCMAKE_CXX_COMPILER=/ucrt64/bin/g++.exe
+          cmake -S . -B build -G Ninja
 
       - name: Build project
-        shell: msys2 {0}
         run: |
-          export PATH="/ucrt64/bin:$PATH"
           cmake --build build
 
       - name: Run code generator
-        shell: msys2 {0}
         run: |
-          export PATH="/ucrt64/bin:$PATH"
-          ./build/app.exe proto/rpc.proto
+          ./build/app proto/rpc.proto
 
       - name: Verify generated files
-        shell: msys2 {0}
         run: |
           test -f output/UserRequest.h
           test -f output/UserRequest.c
@@ -73,13 +50,5 @@ jobs:
           echo "All generated files exist."
 
       - name: Run TLS test
-        shell: msys2 {0}
         run: |
-          export PATH="/ucrt64/bin:$PATH"
-
-          if [ -f build/test_tls.exe ]; then
-            ./build/test_tls.exe
-          else
-            echo "TLS test executable was not generated."
-            exit 1
-          fi
+          ./build/test_tls
