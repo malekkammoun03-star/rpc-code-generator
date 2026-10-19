@@ -36,7 +36,7 @@ Features
 
 
 
-\## Architecture
+Architecture
 
 
 
