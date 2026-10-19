@@ -1,4 +1,4 @@
-\# RPC Code Generator
+RPC Code Generator
 
 
 
@@ -10,7 +10,7 @@ The project also includes a TLS runtime based on mbedTLS and an automated GitHub
 
 
 
-\## Features
+Features
 
 
 
@@ -44,55 +44,55 @@ The project also includes a TLS runtime based on mbedTLS and an automated GitHub
 
 .proto file
 
-&#x20;   |
+ |
 
-&#x20;   v
+ v
 
 ProtoParser
 
-&#x20;   |
+ |
 
-&#x20;   +---- Message definitions
+ +---- Message definitions
 
-&#x20;   |
+ |
 
-&#x20;   +---- Service definitions
+ +---- Service definitions
 
-&#x20;   |
+ |
 
-&#x20;   v
+ v
 
 CodeGenerator
 
-&#x20;   |
+ |
 
-&#x20;   +---- Message .h/.c files
+ +---- Message .h/.c files
 
-&#x20;   |
+ |
 
-&#x20;   +---- Service .h/.cpp files
+  +---- Service .h/.cpp files
 
-&#x20;   |
+  |
 
-&#x20;   v
+  v
 
 Generated RPC Client
 
-&#x20;   |
+  |
 
-&#x20;   v
+  v
 
 RpcClient
 
-&#x20;   |
+  |
 
-&#x20;   v
+  v
 
 TlsClient
 
-&#x20;   |
+  |
 
-&#x20;   v
+  v
 
 TLS / Network
 
